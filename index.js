@@ -1,6 +1,7 @@
 const express = require("express");
 const { MongoClient } = require("mongodb");
 const cors = require("cors");
+const ObjectId = require("mongodb").ObjectId;
 require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 5000;
@@ -18,8 +19,21 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     await client.connect();
-    const database = client.db("products2");
-    const productsCollection = database.collection("productsCollection");
+    const database = client.db("travely-database");
+    const offerCollection = database.collection("offerings");
+    //get offerings
+    app.get("/offerings", async (req, res) => {
+      const cursor = offerCollection.find({});
+      const tours = await cursor.toArray();
+      res.send(tours);
+    });
+    //get single offer by id
+    app.get("/offerings/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const tour = await offerCollection.findOne(query);
+      res.send(tour);
+    });
     console.log("connected");
   } finally {
     // await client.close();
