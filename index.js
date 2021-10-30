@@ -21,12 +21,15 @@ async function run() {
     await client.connect();
     const database = client.db("travely-database");
     const offerCollection = database.collection("offerings");
+    const visitorCollection = database.collection("visitors");
+
     //get offerings
     app.get("/offerings", async (req, res) => {
       const cursor = offerCollection.find({});
       const tours = await cursor.toArray();
       res.send(tours);
     });
+
     //get single offer by id
     app.get("/offerings/:id", async (req, res) => {
       const id = req.params.id;
@@ -34,6 +37,52 @@ async function run() {
       const tour = await offerCollection.findOne(query);
       res.send(tour);
     });
+    //post visitors
+    app.post("/visitors", async (req, res) => {
+      const visitor = req.body;
+      console.log(visitor);
+      const result = await visitorCollection.insertOne(visitor);
+      res.json(result);
+    });
+    //get visitors by email
+    app.get("/visitors/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const cursor = visitorCollection.find(query);
+      const visitor = await cursor.toArray();
+      res.send(visitor);
+    });
+    //get all visitors
+    app.get("/visitors", async (req, res) => {
+      const cursor = visitorCollection.find({});
+      const visitors = await cursor.toArray();
+      res.send(visitors);
+    });
+    //delete visitors order
+    app.delete("/visitors/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await visitorCollection.deleteOne(query);
+      res.json(result);
+    });
+    //update status
+    app.put("/visitors/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          status: "Approved",
+        },
+      };
+      const result = await visitorCollection.updateOne(
+        query,
+        updateDoc,
+        options
+      );
+      res.json(result);
+    });
+
     console.log("connected");
   } finally {
     // await client.close();
