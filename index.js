@@ -40,7 +40,6 @@ async function run() {
     //post visitors
     app.post("/visitors", async (req, res) => {
       const visitor = req.body;
-      console.log(visitor);
       const result = await visitorCollection.insertOne(visitor);
       res.json(result);
     });
@@ -80,6 +79,12 @@ async function run() {
         updateDoc,
         options
       );
+      res.json(result);
+    });
+    //post offerings
+    app.post("/offerings", async (req, res) => {
+      const newOffer = req.body;
+      const result = await offerCollection.insertOne(newOffer);
       res.json(result);
     });
 
